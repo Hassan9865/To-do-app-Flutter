@@ -55,11 +55,64 @@ class _HomePageState extends State<HomePage> {
   //   }
   // }
 
+  updateTodo(int? key, Map<String, dynamic> data) async {
+    await taskBox.put(key, data);
+    readTodo();
+  }
+
   // void deleteTodo(int index) {
   //   setState(() {
   //     todos.removeAt(index);
   //   });
   // }
+
+  deleteTodo(int? key) async {
+    await taskBox.delete(key);
+    readTodo();
+  }
+
+  showModel(context, int? key) async {
+    todoController.clear();
+
+    if (key != null) {
+      final item = todos.firstWhere((element) => element['key'] == key);
+      todoController.text = item['task'];
+    }
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(key == null ? "Add To-Do" : "Edit Todo"),
+          content: TextField(
+            controller: todoController,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                var data = {
+                  "task": todoController.text,
+                };
+                if (key == null) {
+                  addTodo(data);
+                } else {
+                  updateTodo(key, data);
+                }
+
+                Navigator.pop(context);
+              },
+              child: Text(key == null ? "Add" : "Update"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,117 +135,91 @@ class _HomePageState extends State<HomePage> {
                 color: Theme.of(context).colorScheme.secondary,
               ),
             ),
-            // trailing: Row(
-            //   mainAxisSize: MainAxisSize.min,
-            //   children: [
-            //     IconButton(
-            //       icon: Icon(
-            //         Icons.edit,
-            //         color: Theme.of(context).colorScheme.primary,
-            //       ),
-            //       onPressed: () {
-            //         // todoController.text = todos[index];
-            //         showDialog(
-            //           context: context,
-            //           builder: (context) {
-            //             return AlertDialog(
-            //               title: Text("Edit To-Do"),
-            //               content: TextField(
-            //                 controller: todoController,
-            //               ),
-            //               actions: [
-            //                 TextButton(
-            //                   onPressed: () {
-            //                     Navigator.pop(context);
-            //                   },
-            //                   child: Text("Cancel"),
-            //                 ),
-            //                 TextButton(
-            //                   onPressed: () {
-            //                     // updateTodo(index);
-            //                     Navigator.pop(context);
-            //                   },
-            //                   child: Text("Save"),
-            //                 ),
-            //               ],
-            //             );
-            //           },
-            //         );
-            //       },
-            //     ),
-            //     IconButton(
-            //       icon: Icon(
-            //         Icons.delete,
-            //         color: Theme.of(context).colorScheme.primary,
-            //       ),
-            //       onPressed: () {
-            //         showDialog(
-            //           context: context,
-            //           builder: (context) {
-            //             return AlertDialog(
-            //               title: Text("Delete To-Do"),
-            //               content: Text(
-            //                   "Are you sure you want to delete this item?"),
-            //               actions: [
-            //                 TextButton(
-            //                   onPressed: () {
-            //                     Navigator.pop(context);
-            //                   },
-            //                   child: Text("Cancel"),
-            //                 ),
-            //                 TextButton(
-            //                   onPressed: () {
-            //                     // deleteTodo(index);
-            //                     Navigator.pop(context);
-            //                   },
-            //                   child: Text("Delete"),
-            //                 ),
-            //               ],
-            //             );
-            //           },
-            //         );
-            //       },
-            //     ),
-            //   ],
-            // ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.edit,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  onPressed: () {
+                    // todoController.text = todos[index];
+                    // showDialog(
+                    //   context: context,
+                    //   builder: (context) {
+                    //     return AlertDialog(
+                    //       title: Text("Edit To-Do"),
+                    //       content: TextField(
+                    //         controller: todoController,
+                    //       ),
+                    //       actions: [
+                    //         TextButton(
+                    //           onPressed: () {
+                    //             Navigator.pop(context);
+                    //           },
+                    //           child: Text("Cancel"),
+                    //         ),
+                    //         TextButton(
+                    //           onPressed: () {
+                    //             // updateTodo(index);
+                    //             Navigator.pop(context);
+                    //           },
+                    //           child: Text("Save"),
+                    //         ),
+                    //       ],
+                    //     );
+                    //   },
+                    // );
+                    showModel(context, currentitem['key']);
+                  },
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text("Delete To-Do"),
+                          content: Text(
+                              "Are you sure you want to delete this item?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                // deleteTodo(index);
+                                deleteTodo(currentitem['key']);
+                                Navigator.pop(context);
+                              },
+                              child: Text("Delete"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text("Add To-Do"),
-                content: TextField(
-                  controller: todoController,
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text("Cancel"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      var data = {
-                        "task": todoController.text,
-                      };
-                      addTodo(data);
-                      Navigator.pop(context);
-                    },
-                    child: Text("Add"),
-                  ),
-                ],
-              );
-            },
-          );
+          showModel(context, null);
         },
         child: Icon(
           Icons.add,
-          color: Theme.of(context).colorScheme.primary,
+          color: Colors.white,
         ),
       ),
     );
