@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:note_book/pages/login_page.dart';
 import 'package:note_book/themeProvider.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized;
+  await Hive.initFlutter();
+  await Hive.openBox("taskBox");
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
